@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from "../services/api";
 import { jsPDF } from 'jspdf';
 import './Upload.css';
 
@@ -124,8 +124,10 @@ const Upload = () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:8000/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const response = await api.post("/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       clearInterval(stepInterval);
