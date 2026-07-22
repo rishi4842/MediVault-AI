@@ -107,7 +107,7 @@ npm run dev
 
 ## 📹 Demo Video
 
-(Add your demo video link)
+(https://drive.google.com/file/d/1SNJlHdbcu2FU19ikCGpiryxP5KuLKoa6/view?usp=sharing)
 
 ---
 
