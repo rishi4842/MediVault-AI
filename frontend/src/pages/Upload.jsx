@@ -175,6 +175,11 @@ const Upload = () => {
   };
 
   const downloadPDF = () => {
+    alert("PDF button clicked");
+
+    console.log("analysisResult", analysisResult);
+    console.log("parsedData", parsedData);
+
     if (!analysisResult || !parsedData) return;
 
     const doc = new jsPDF();
