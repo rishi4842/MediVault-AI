@@ -114,7 +114,7 @@ npm run dev
 ## 🌐 Live Demo
 
 Frontend:
-(medi-vault-ai-git-main-dome4.vercel.app)
+(https://medi-vault-ai-git-main-dome4.vercel.app/)
 
 Backend API:
 (https://medivault-ai-backend.onrender.com)
