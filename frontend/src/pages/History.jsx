@@ -199,6 +199,17 @@ const History = () => {
   const computeReportStatus = (analysisStr) => {
     const text = (analysisStr || '').toLowerCase();
 
+    // Check for clear NORMAL indicators first to avoid false positives
+    if ((text.includes('normal') || text.includes('no fracture') || text.includes('no abnormality') || text.includes('no abnormal') || text.includes('unremarkable')) && 
+        !(text.includes('fracture') && text.includes('normal')) &&
+        !text.includes('moderate') &&
+        !text.includes('severe') &&
+        !text.includes('critical') &&
+        !text.includes('high')) {
+      return { label: 'Normal', category: 'Normal', badgeClass: 'badge-normal' };
+    }
+
+    // Then check severity levels
     if (text.includes('high') || text.includes('critical') || text.includes('severe')) {
       return { label: 'Critical', category: 'Critical', badgeClass: 'badge-critical' };
     }
