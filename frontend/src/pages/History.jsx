@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from "../services/api";
 import { jsPDF } from 'jspdf';
 import './History.css';
 
@@ -12,7 +12,7 @@ const History = () => {
   const [filterType, setFilterType] = useState('All');
 
   useEffect(() => {
-    axios.get('http://localhost:8000/history')
+    api.get('/history')
       .then(response => {
         setHistory(response.data || []);
         setLoading(false);
@@ -68,41 +68,37 @@ const History = () => {
   };
 
   const downloadReportPDF = (report) => {
-    const doc = new jsPDF();
-    const cleanText = cleanAnalysisText(report.analysis);
-    
-    doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, 210, 40, 'F');
+    if (!report) {
+      alert("No report available.");
+      return;
+    }
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
-    doc.setTextColor(255, 255, 255);
-    doc.text("MEDIVAULT AI", 20, 20);
+    try {
+      const doc = new jsPDF();
+      const cleanText = cleanAnalysisText(report.analysis);
 
-    doc.setFontSize(10);
-    doc.setTextColor(168, 85, 247);
-    doc.text("CLINICAL DIAGNOSTIC REPORT", 20, 28);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text("MediVault AI Report", 20, 20);
 
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Generated Date: ${new Date().toLocaleString()}`, 20, 50);
-    doc.text(`Source Filename: ${report.filename || 'Scan.jpg'}`, 20, 56);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
 
-    doc.setLineWidth(0.3);
-    doc.setStrokeColor(220, 220, 220);
-    doc.line(20, 62, 190, 62);
+      doc.text(`Date: ${new Date().toLocaleString()}`, 20, 35);
+      doc.text(`File: ${report.filename || "Medical Scan"}`, 20, 45);
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.setTextColor(30, 30, 30);
-    doc.text("AI ANALYSIS:", 20, 75);
-    
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    const splitText = doc.splitTextToSize(cleanText, 170);
-    doc.text(splitText, 20, 85);
+      doc.setFont("helvetica", "bold");
+      doc.text("Analysis:", 20, 65);
 
-    doc.save(`MediVault-Report-${report.filename || Date.now()}.pdf`);
+      doc.setFont("helvetica", "normal");
+      const analysisLines = doc.splitTextToSize(cleanText, 170);
+      doc.text(analysisLines, 20, 75);
+
+      doc.save(`MediVault-Report-${report.filename || Date.now()}.pdf`);
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
   };
 
   const computeReportStatus = (analysisStr) => {
@@ -211,7 +207,7 @@ const History = () => {
               {filteredReports.map((report, idx) => {
                 const status = computeReportStatus(report.analysis);
                 const cleanText = cleanAnalysisText(report.analysis);
-                const imageUrl = report.image ? (report.image.startsWith('data:') ? report.image : `http://localhost:8000/${report.image}`) : null;
+                const imageUrl = report.image ? (report.image.startsWith('data:') ? report.image : `https://medivault-ai-backend.onrender.com/${report.image}`) : null;
                 
                 return (
                   <div key={idx} className="glass-panel report-item-card">
