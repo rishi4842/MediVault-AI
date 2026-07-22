@@ -80,28 +80,42 @@ const Upload = () => {
 
   const parseAnalysisText = (rawAnalysis) => {
     if (!rawAnalysis) return null;
-    let findingsText = '';
     
+    let findingsText = '';
+    let parsedObj = {};
+
+    // 1. Safely handle the stringified JSON (and potential markdown from Gemini)
     if (typeof rawAnalysis === 'object') {
-      findingsText = rawAnalysis.findings || rawAnalysis.analysis || "Standard radiological evaluation performed.";
+      parsedObj = rawAnalysis;
     } else {
       try {
-        const parsed = JSON.parse(rawAnalysis);
-        findingsText = parsed.findings || parsed.analysis || rawAnalysis;
+        // Strip out ```json and ``` if the AI accidentally wrapped the response
+        const cleanString = rawAnalysis.replace(/```json/gi, '').replace(/```/g, '').trim();
+        parsedObj = JSON.parse(cleanString);
       } catch (e) {
+        // If it still fails to parse, treat the whole raw string as the finding
         findingsText = rawAnalysis;
       }
     }
 
+    // 2. Map backend schema keys to the frontend display correctly
+    if (Object.keys(parsedObj).length > 0 && !findingsText) {
+      findingsText = parsedObj.primary_finding || 
+                     parsedObj.findings || 
+                     parsedObj.analysis || 
+                     JSON.stringify(parsedObj);
+    }
+
     const status = computeReportStatus(findingsText);
+    
     return {
       findings: findingsText,
-      condition: status.category === 'Normal' ? 'Normal Radiological Finding' : `${status.label} Medical Observation`,
-      severity: status.label,
+      condition: parsedObj.condition || (status.category === 'Normal' ? 'Normal Radiological Finding' : `${status.label} Medical Observation`),
+      severity: parsedObj.severity || status.label, // Use AI's severity if provided, else fallback to computation
       badgeClass: status.badgeClass,
       category: status.category,
-      recommendation: findingsText.toLowerCase().includes('fracture') ? 'Consult orthopedic specialist immediately.' : 'Routine follow-up as indicated by primary physician.',
-      confidence: 96
+      recommendation: parsedObj.recommendation || (findingsText.toLowerCase().includes('fracture') ? 'Consult orthopedic specialist immediately.' : 'Routine follow-up as indicated by primary physician.'),
+      confidence: parsedObj.confidence || 96
     };
   };
 
@@ -124,16 +138,18 @@ const Upload = () => {
     formData.append('file', file);
 
     try {
-      const response = await api.post("/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await api.post("/upload", formData);
 
+      console.log(response.data);
       clearInterval(stepInterval);
-      setAnalysisResult(response.data);
-      setParsedData(parseAnalysisText(response.data.analysis));
+      
+      // Ensure we are working with an object just in case Axios didn't auto-parse
+      const responseData = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+
+      setAnalysisResult(responseData);
+      setParsedData(parseAnalysisText(responseData.analysis));
       showToast('Analysis completed successfully!', 'success');
+      
     } catch (err) {
       clearInterval(stepInterval);
       console.error('Upload error:', err);
