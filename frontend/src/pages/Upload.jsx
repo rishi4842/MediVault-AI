@@ -175,83 +175,67 @@ const Upload = () => {
   };
 
   const downloadPDF = () => {
-    alert("PDF button clicked");
+    if (!analysisResult || !parsedData) {
+      alert("No report available.");
+      return;
+    }
 
-    console.log("analysisResult", analysisResult);
-    console.log("parsedData", parsedData);
+    try {
+      const doc = new jsPDF();
 
-    if (!analysisResult || !parsedData) return;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text("MediVault AI Report", 20, 20);
 
-    const doc = new jsPDF();
-    
-    // Header background bar
-    doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, 210, 40, 'F');
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
-    doc.setTextColor(255, 255, 255);
-    doc.text("MEDIVAULT AI", 20, 20);
+      doc.text(`Date: ${new Date().toLocaleString()}`, 20, 35);
+      doc.text(
+        `File: ${analysisResult.filename || file?.name || "Medical Scan"}`,
+        20,
+        45
+      );
 
-    doc.setFontSize(10);
-    doc.setTextColor(168, 85, 247);
-    doc.text("HOSPITAL-GRADE CLINICAL DIAGNOSTIC REPORT", 20, 28);
+      doc.setFont("helvetica", "bold");
+      doc.text("Diagnosis:", 20, 65);
 
-    // Meta details
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Generated Date: ${new Date().toLocaleString()}`, 20, 50);
-    doc.text(`Source Filename: ${analysisResult.filename || file?.name || 'Scan.jpg'}`, 20, 56);
+      doc.setFont("helvetica", "normal");
+      doc.text(parsedData.condition || "", 60, 65);
 
-    doc.setLineWidth(0.3);
-    doc.setStrokeColor(220, 220, 220);
-    doc.line(20, 62, 190, 62);
+      doc.setFont("helvetica", "bold");
+      doc.text("Severity:", 20, 80);
 
-    // Diagnosis & Severity Block
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.setTextColor(30, 30, 30);
-    doc.text("DIAGNOSIS:", 20, 72);
-    doc.setFont("helvetica", "normal");
-    doc.text(parsedData.condition, 60, 72);
+      doc.setFont("helvetica", "normal");
+      doc.text(parsedData.severity || "", 60, 80);
 
-    doc.setFont("helvetica", "bold");
-    doc.text("SEVERITY:", 20, 80);
-    doc.setFont("helvetica", "normal");
-    doc.text(parsedData.severity, 60, 80);
+      doc.setFont("helvetica", "bold");
+      doc.text("Clinical Findings:", 20, 100);
 
-    doc.setFont("helvetica", "bold");
-    doc.text("AI CONFIDENCE:", 20, 88);
-    doc.setFont("helvetica", "normal");
-    doc.text(`${parsedData.confidence}%`, 60, 88);
+      doc.setFont("helvetica", "normal");
+      const findings = doc.splitTextToSize(
+        parsedData.findings || "",
+        170
+      );
+      doc.text(findings, 20, 110);
 
-    doc.line(20, 96, 190, 96);
+      let y = 110 + findings.length * 6 + 10;
 
-    // Clinical Findings
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("CLINICAL FINDINGS:", 20, 108);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    const findingsLines = doc.splitTextToSize(parsedData.findings, 170);
-    doc.text(findingsLines, 20, 116);
+      doc.setFont("helvetica", "bold");
+      doc.text("Recommendation:", 20, y);
 
-    // Recommendations
-    const currentY = 116 + (findingsLines.length * 6) + 10;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("RECOMMENDATIONS:", 20, currentY);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    const recLines = doc.splitTextToSize(parsedData.recommendation, 170);
-    doc.text(recLines, 20, currentY + 8);
+      doc.setFont("helvetica", "normal");
+      const rec = doc.splitTextToSize(
+        parsedData.recommendation || "",
+        170
+      );
+      doc.text(rec, 20, y + 10);
 
-    // Footer
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    doc.text("MediVault AI Diagnostic System — Verified secure record.", 20, 285);
-
-    doc.save(`MediVault-Report-${Date.now()}.pdf`);
+      doc.save("MediVault_Report.pdf");
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
   };
 
   return (
