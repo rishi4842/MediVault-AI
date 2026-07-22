@@ -1,47 +1,43 @@
 import os
-import mimetypes
-
+import json
 from dotenv import load_dotenv
 from google import genai
-from google.genai import types
 
 load_dotenv()
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
+)
 
 def analyze_xray(file_path):
     try:
-        mime_type = mimetypes.guess_type(file_path)[0] or "image/jpeg"
-
-        with open(file_path, "rb") as f:
-            image_bytes = f.read()
-
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[
-                """
-You are an AI assistant for medical image analysis.
-
-Analyze the uploaded X-ray.
+        with open(file_path, "rb") as image:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=[
+                    image,
+                    """
+Analyze this X-ray.
 
 Return ONLY valid JSON.
 
 {
-  "severity": "Normal",
-  "primary_finding": "",
-  "clinical_findings": "",
-  "recommendation": ""
+  "severity":"Normal|Warning|Critical",
+  "primary_finding":"",
+  "clinical_findings":"",
+  "recommendation":""
 }
-""",
-                types.Part.from_bytes(
-                    data=image_bytes,
-                    mime_type=mime_type,
-                ),
-            ],
-        )
+"""
+                ]
+            )
 
         return response.text
 
     except Exception as e:
-        return f"Error: {e}"
+        print("Gemini Error:", e)
+        return json.dumps({
+            "severity":"Warning",
+            "primary_finding":"AI analysis unavailable",
+            "clinical_findings":str(e),
+            "recommendation":"Please try again later."
+        })
