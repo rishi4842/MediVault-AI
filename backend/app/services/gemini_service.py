@@ -16,7 +16,44 @@ def analyze_xray(file_path):
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=[
-                "Describe this X-ray.",
+                """
+You are an AI medical assistant.
+
+Analyze the uploaded medical document.
+
+The uploaded file may be:
+- X-ray
+- Blood Test
+- Sugar Report
+- Blood Pressure Report
+- Prescription
+- ECG
+- Lab Report
+- Any healthcare document
+
+Return ONLY valid JSON.
+
+Format:
+
+{
+  "document_type":"",
+  "condition":"",
+  "severity":"",
+  "findings":"",
+  "medications":"",
+  "recommendation":""
+}
+
+Rules:
+
+- Detect the document type.
+- If it is a prescription, list medicines.
+- If it is a blood report, summarize abnormal values.
+- If it is an X-ray, summarize radiology findings.
+- If handwriting is unclear, mention that.
+- Never invent diseases.
+- Keep findings concise and patient-friendly.
+""",
                 uploaded_file,
             ],
         )
@@ -32,9 +69,11 @@ def analyze_xray(file_path):
 
         return """
 {
-  "severity":"Normal",
-  "primary_finding":"No acute fracture detected.",
-  "clinical_findings":"Bone alignment appears preserved. No obvious abnormalities visible in this sample image.",
-  "recommendation":"Recommend routine clinical review if symptoms persist."
+  "document_type":"Medical Document",
+  "condition":"Unable to analyze",
+  "severity":"Unknown",
+  "findings":"Document analysis temporarily unavailable.",
+  "medications":"None",
+  "recommendation":"Please try again or contact support."
 }
 """

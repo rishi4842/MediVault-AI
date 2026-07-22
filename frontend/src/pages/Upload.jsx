@@ -81,7 +81,6 @@ const Upload = () => {
   const parseAnalysisText = (rawAnalysis) => {
     if (!rawAnalysis) return null;
     
-    let findingsText = '';
     let parsedObj = {};
 
     // 1. Safely handle the stringified JSON (and potential markdown from Gemini)
@@ -93,28 +92,28 @@ const Upload = () => {
         const cleanString = rawAnalysis.replace(/```json/gi, '').replace(/```/g, '').trim();
         parsedObj = JSON.parse(cleanString);
       } catch (e) {
-        // If it still fails to parse, treat the whole raw string as the finding
-        findingsText = rawAnalysis;
+        // If it still fails to parse, return null
+        return null;
       }
     }
 
-    // 2. Map backend schema keys to the frontend display correctly
-    if (Object.keys(parsedObj).length > 0 && !findingsText) {
-      findingsText = parsedObj.primary_finding || 
-                     parsedObj.findings || 
-                     parsedObj.analysis || 
-                     JSON.stringify(parsedObj);
-    }
+    // 2. Extract findings text for status computation
+    const findingsText = parsedObj.findings || 
+                         parsedObj.primary_finding || 
+                         parsedObj.analysis || 
+                         JSON.stringify(parsedObj);
 
     const status = computeReportStatus(findingsText);
     
     return {
+      document_type: parsedObj.document_type || 'Medical Document',
+      condition: parsedObj.condition || (status.category === 'Normal' ? 'Normal Finding' : `${status.label} Finding`),
       findings: findingsText,
-      condition: parsedObj.condition || (status.category === 'Normal' ? 'Normal Radiological Finding' : `${status.label} Medical Observation`),
-      severity: parsedObj.severity || status.label, // Use AI's severity if provided, else fallback to computation
+      severity: parsedObj.severity || status.label,
+      medications: parsedObj.medications || 'None',
       badgeClass: status.badgeClass,
       category: status.category,
-      recommendation: parsedObj.recommendation || (findingsText.toLowerCase().includes('fracture') ? 'Consult orthopedic specialist immediately.' : 'Routine follow-up as indicated by primary physician.'),
+      recommendation: parsedObj.recommendation || 'Consult with your healthcare provider for further evaluation.',
       confidence: parsedObj.confidence || 96
     };
   };
@@ -192,34 +191,54 @@ const Upload = () => {
 
       doc.text(`Date: ${new Date().toLocaleString()}`, 20, 35);
       doc.text(
-        `File: ${analysisResult.filename || file?.name || "Medical Scan"}`,
+        `File: ${analysisResult.filename || file?.name || "Medical Document"}`,
         20,
         45
       );
 
       doc.setFont("helvetica", "bold");
-      doc.text("Diagnosis:", 20, 65);
+      doc.text("Document Type:", 20, 60);
 
       doc.setFont("helvetica", "normal");
-      doc.text(parsedData.condition || "", 60, 65);
+      doc.text(parsedData.document_type || "Medical Document", 80, 60);
 
       doc.setFont("helvetica", "bold");
-      doc.text("Severity:", 20, 80);
+      doc.text("Diagnosis:", 20, 75);
 
       doc.setFont("helvetica", "normal");
-      doc.text(parsedData.severity || "", 60, 80);
+      doc.text(parsedData.condition || "", 80, 75);
 
       doc.setFont("helvetica", "bold");
-      doc.text("Clinical Findings:", 20, 100);
+      doc.text("Severity:", 20, 90);
+
+      doc.setFont("helvetica", "normal");
+      doc.text(parsedData.severity || "", 80, 90);
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Clinical Findings:", 20, 110);
 
       doc.setFont("helvetica", "normal");
       const findings = doc.splitTextToSize(
         parsedData.findings || "",
         170
       );
-      doc.text(findings, 20, 110);
+      doc.text(findings, 20, 120);
 
-      let y = 110 + findings.length * 6 + 10;
+      let y = 120 + findings.length * 6 + 10;
+
+      if (parsedData.medications && parsedData.medications !== 'None') {
+        doc.setFont("helvetica", "bold");
+        doc.text("Medications:", 20, y);
+
+        doc.setFont("helvetica", "normal");
+        const meds = doc.splitTextToSize(
+          parsedData.medications || "",
+          170
+        );
+        doc.text(meds, 20, y + 10);
+
+        y = y + meds.length * 6 + 10;
+      }
 
       doc.setFont("helvetica", "bold");
       doc.text("Recommendation:", 20, y);
@@ -363,6 +382,13 @@ const Upload = () => {
               {parsedData ? (
                 <div className="diagnostic-report-container">
                   <div className="report-card-section">
+                    <span className="section-label">� Document Type</span>
+                    <div className="diagnosis-highlight-box">
+                      <h4>{parsedData.document_type}</h4>
+                    </div>
+                  </div>
+
+                  <div className="report-card-section">
                     <span className="section-label">📋 Primary Diagnosis</span>
                     <div className="diagnosis-highlight-box">
                       <h4>{parsedData.condition}</h4>
@@ -399,6 +425,15 @@ const Upload = () => {
                     </div>
                   </div>
 
+                  {parsedData.medications && parsedData.medications !== 'None' && (
+                    <div className="report-card-section">
+                      <span className="section-label">💊 Medications</span>
+                      <div className="findings-card-box">
+                        <p>{parsedData.medications}</p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="report-card-section">
                     <span className="section-label">💡 Clinical Recommendation</span>
                     <div className="recommendation-card-box">
@@ -417,7 +452,7 @@ const Upload = () => {
                 <div className="placeholder-results">
                   <div className="placeholder-icon">⚡</div>
                   <h4>Ready for Analysis</h4>
-                  <p>Upload a medical scan to generate live structured insights and PDF reports.</p>
+                  <p>Upload a medical document to generate live structured insights and PDF reports.</p>
                 </div>
               )}
             </div>
