@@ -52,3 +52,26 @@ async def get_history():
             return json.load(f)
 
     return []
+from fastapi import HTTPException
+
+@router.delete("/delete/{index}")
+def delete_report(index: int):
+    try:
+        with open("history.json", "r") as file:
+            history = json.load(file)
+
+        if index < 0 or index >= len(history):
+            raise HTTPException(status_code=404, detail="Report not found")
+
+        deleted = history.pop(index)
+
+        with open("history.json", "w") as file:
+            json.dump(history, file, indent=4)
+
+        return {
+            "message": "Report deleted successfully",
+            "deleted": deleted["filename"]
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
