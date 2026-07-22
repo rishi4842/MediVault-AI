@@ -152,9 +152,23 @@ const Upload = () => {
       
     } catch (err) {
       clearInterval(stepInterval);
-      console.error('Upload error:', err);
-      setError('Failed to process image through Gemini AI. Verify FastAPI server is running.');
-      showToast('Analysis failed. Check connection.', 'error');
+
+      console.log("FULL ERROR");
+      console.log(err);
+      console.log("RESPONSE");
+      console.log(err.response);
+      console.log("DATA");
+      console.log(err.response?.data);
+
+      if (err.response?.data?.detail) {
+        setError(JSON.stringify(err.response.data.detail));
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError(err.message);
+      }
+
+      showToast("Analysis failed", "error");
     } finally {
       setLoading(false);
     }
