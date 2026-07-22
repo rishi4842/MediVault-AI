@@ -1,0 +1,37 @@
+[
+    {
+        "filename": "IMG_5779.jpg",
+        "image": "uploads/IMG_5779.jpg",
+        "analysis": "{\n  \"findings\": \"Bony structures of the hand and wrist appear intact. Joint spaces are preserved. No gross fractures, dislocations, or significant degenerative changes are evident on this X-ray.\",\n  \"condition\": \"No overt acute pathology observed. Appears within normal limits for an X-ray of the hand.\",\n  \"severity\": \"Not applicable, as no acute findings.\",\n  \"recommendation\": \"Further clinical evaluation recommended.\"\n}"
+    },
+    {
+        "filename": "IMG_5779.jpg",
+        "image": "uploads/IMG_5779.jpg",
+        "analysis": "{\n  \"findings\": \"No acute fractures or dislocations are identified. Bone alignment appears normal. Joint spaces are preserved. No obvious soft tissue swelling or significant osseous pathology.\",\n  \"condition\": \"Appears unremarkable based on current imaging.\",\n  \"severity\": \"Not applicable as no specific acute pathology is identified.\",\n  \"recommendation\": \"Further clinical evaluation recommended.\"\n}"
+    },
+    {
+        "filename": "IMG_5779.jpg",
+        "image": "uploads/IMG_5779.jpg",
+        "analysis": "{\n  \"findings\": \"The X-ray image displays the bony structures of the hand and wrist. Overall bone alignment appears maintained. No clear fractures, dislocations, or significant lytic/blastic lesions are identified.\",\n  \"condition\": \"The osseous structures of the hand and wrist appear intact with preserved joint spaces. No acute bony pathology is evident on this projection.\",\n  \"severity\": \"Not applicable as no acute pathology is clearly demonstrated.\",\n  \"recommendation\": \"Further clinical evaluation recommended to correlate with the patient's symptoms and full medical history.\"\n}"
+    },
+    {
+        "filename": "IMG_5779.jpg",
+        "image": "uploads/IMG_5779.jpg",
+        "analysis": "{\"findings\": \"No acute fractures or dislocations are evident. Joint spaces appear preserved. Bone density appears within normal limits for this projection.\", \"condition\": \"No significant acute bony or joint abnormalities are identified on this single projection image.\", \"severity\": \"No acute significant findings. Status is non-acute based on this image alone.\", \"recommendation\": \"Further clinical evaluation recommended, correlating with patient history and physical examination.\"}"
+    },
+    {
+        "filename": "IMG_5779.jpg",
+        "image": "uploads/IMG_5779.jpg",
+        "analysis": "{\n  \"findings\": \"No clear abnormalities, fractures, or dislocations are identified. Bone density appears within normal limits.\",\n  \"condition\": \"No acute traumatic findings or significant degenerative changes observed.\",\n  \"severity\": \"None.\",\n  \"recommendation\": \"Further clinical evaluation recommended.\"\n}"
+    },
+    {
+        "filename": "IMG_5779.jpg",
+        "image": "uploads/IMG_5779.jpg",
+        "analysis": "{\"findings\": \"Normal bony architecture of the carpal bones, metacarpals, and phalanges. No evidence of acute fracture or dislocation. Joint spaces appear preserved.\", \"condition\": \"Normal appearance of the hand and wrist bones.\", \"severity\": \"Not applicable.\", \"recommendation\": \"Further clinical evaluation recommended.\"}"
+    },
+    {
+        "filename": "IMG_5779.jpg",
+        "image": "uploads/IMG_5779.jpg",
+        "analysis": "{\"severity\": \"Normal\", \"primary_finding\": \"No acute bony abnormalities or fractures are identified in the hand and wrist.\", \"clinical_findings\": \"The alignment of the carpal bones, metacarpals, and phalanges appears normal. Joint spaces are well-maintained, and no dislocations are observed. Bone morphology is within normal limits.\", \"recommendation\": \"Routine clinical follow-up as indicated by patient symptoms.\"}"
+    }
+]

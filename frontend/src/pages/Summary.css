@@ -1,0 +1,27 @@
+.summary-wrapper { position: relative; width: 100vw; min-height: 100vh; background-color: #070514; color: #FFFFFF; overflow-x: hidden; text-align: left; }
+.summary-container { max-width: 1600px; margin: 0 auto; padding: 0 80px; width: 100%; position: relative; z-index: 1; }
+.summary-main { padding-top: 140px; padding-bottom: 80px; }
+.summary-header { margin-bottom: 40px; }
+.summary-header h2 { font-size: 42px; font-weight: 800; margin-top: 8px; margin-bottom: 12px; }
+.summary-header p { color: #94A3B8; font-size: 16px; }
+
+.summary-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
+.summary-stat-card { padding: 24px; display: flex; align-items: center; gap: 20px; }
+.summary-stat-card h3 { font-size: 28px; font-weight: 800; color: white; margin-bottom: 4px; }
+.summary-stat-card p { font-size: 13px; color: #94A3B8; font-weight: 600; text-transform: uppercase; }
+
+.summary-content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.summary-section-box { padding: 32px; }
+.summary-section-box h3 { font-size: 20px; font-weight: 700; margin-bottom: 20px; border-bottom: 1px solid rgba(139, 92, 246, 0.2); padding-bottom: 12px; }
+
+.diag-item-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 15px; }
+.diag-item-row span { color: #94A3B8; }
+.status-tag.normal { color: #10B981; font-weight: 600; }
+.diag-findings-preview { margin-top: 16px; background: #0B091A; padding: 16px; border-radius: 10px; font-size: 14px; color: #94A3B8; line-height: 1.5; }
+
+.insights-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.insights-list li { display: flex; gap: 12px; color: #94A3B8; font-size: 15px; line-height: 1.5; }
+.insights-list li span { color: #C084FC; font-weight: bold; }
+
+.no-data-text { color: #94A3B8; font-size: 14px; }
+@media (max-width: 1200px) { .summary-stats-grid { grid-template-columns: repeat(2, 1fr); } .summary-content-grid { grid-template-columns: 1fr; } }
