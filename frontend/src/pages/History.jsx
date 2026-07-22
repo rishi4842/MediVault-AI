@@ -24,6 +24,47 @@ const History = () => {
       });
   }, []);
 
+  // New: Parse analysis like Upload.jsx does
+  const parseAnalysisText = (rawAnalysis) => {
+    if (!rawAnalysis) return null;
+    
+    let parsedObj = {};
+
+    // 1. Safely handle the stringified JSON (and potential markdown from Gemini)
+    if (typeof rawAnalysis === 'object') {
+      parsedObj = rawAnalysis;
+    } else {
+      try {
+        // Strip out ```json and ``` if the AI accidentally wrapped the response
+        const cleanString = rawAnalysis.replace(/```json/gi, '').replace(/```/g, '').trim();
+        parsedObj = JSON.parse(cleanString);
+      } catch (e) {
+        // If it still fails to parse, return null
+        return null;
+      }
+    }
+
+    // 2. Extract findings text for status computation
+    const findingsText = parsedObj.findings || 
+                         parsedObj.primary_finding || 
+                         parsedObj.analysis || 
+                         JSON.stringify(parsedObj);
+
+    const status = computeReportStatus(findingsText);
+    
+    return {
+      document_type: parsedObj.document_type || 'Medical Document',
+      condition: parsedObj.condition || (status.category === 'Normal' ? 'Normal Finding' : `${status.label} Finding`),
+      findings: findingsText,
+      severity: parsedObj.severity || status.label,
+      medications: parsedObj.medications || 'None',
+      badgeClass: status.badgeClass,
+      category: status.category,
+      recommendation: parsedObj.recommendation || 'Consult with your healthcare provider for further evaluation.',
+      confidence: parsedObj.confidence || 96
+    };
+  };
+
   // Robust cleaner to strip out raw JSON formatting and extract plain text
   const cleanAnalysisText = (raw) => {
     if (!raw) return 'No clinical notes recorded.';
@@ -75,7 +116,7 @@ const History = () => {
 
     try {
       const doc = new jsPDF();
-      const cleanText = cleanAnalysisText(report.analysis);
+      const parsedData = parseAnalysisText(report.analysis);
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(18);
@@ -85,14 +126,68 @@ const History = () => {
       doc.setFontSize(11);
 
       doc.text(`Date: ${new Date().toLocaleString()}`, 20, 35);
-      doc.text(`File: ${report.filename || "Medical Scan"}`, 20, 45);
+      doc.text(`File: ${report.filename || "Medical Document"}`, 20, 45);
+
+      let y = 60;
+
+      if (parsedData && parsedData.document_type) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Document Type:", 20, y);
+
+        doc.setFont("helvetica", "normal");
+        doc.text(parsedData.document_type, 80, y);
+        y += 15;
+      }
 
       doc.setFont("helvetica", "bold");
-      doc.text("Analysis:", 20, 65);
+      doc.text("Diagnosis:", 20, y);
 
       doc.setFont("helvetica", "normal");
-      const analysisLines = doc.splitTextToSize(cleanText, 170);
-      doc.text(analysisLines, 20, 75);
+      doc.text(parsedData?.condition || "Unknown", 80, y);
+      y += 15;
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Severity:", 20, y);
+
+      doc.setFont("helvetica", "normal");
+      doc.text(parsedData?.severity || "Unknown", 80, y);
+      y += 15;
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Clinical Findings:", 20, y);
+
+      doc.setFont("helvetica", "normal");
+      const findings = doc.splitTextToSize(
+        parsedData?.findings || "",
+        170
+      );
+      doc.text(findings, 20, y + 10);
+
+      y = y + 10 + findings.length * 6 + 10;
+
+      if (parsedData && parsedData.medications && parsedData.medications !== 'None') {
+        doc.setFont("helvetica", "bold");
+        doc.text("Medications:", 20, y);
+
+        doc.setFont("helvetica", "normal");
+        const meds = doc.splitTextToSize(
+          parsedData.medications || "",
+          170
+        );
+        doc.text(meds, 20, y + 10);
+
+        y = y + 10 + meds.length * 6 + 10;
+      }
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Recommendation:", 20, y);
+
+      doc.setFont("helvetica", "normal");
+      const rec = doc.splitTextToSize(
+        parsedData?.recommendation || "",
+        170
+      );
+      doc.text(rec, 20, y + 10);
 
       doc.save(`MediVault-Report-${report.filename || Date.now()}.pdf`);
     } catch (err) {
@@ -206,6 +301,7 @@ const History = () => {
             <div className="reports-grid">
               {filteredReports.map((report, idx) => {
                 const status = computeReportStatus(report.analysis);
+                const parsedData = parseAnalysisText(report.analysis);
                 const cleanText = cleanAnalysisText(report.analysis);
                 const imageUrl = report.image ? (report.image.startsWith('data:') ? report.image : `https://medivault-ai-backend.onrender.com/${report.image}`) : null;
                 
@@ -225,11 +321,18 @@ const History = () => {
                     
                     <div className="report-card-content">
                       <div className="card-top-meta">
-                        <span className="file-title">{report.filename || `Scan Report`}</span>
+                        <span className="file-title">{report.filename || `Medical Report`}</span>
                         <span className={`severity-tag ${status.badgeClass}`}>
                           {status.category === 'Normal' ? '🟢' : status.category === 'Warning' ? '🟡' : '🔴'} {status.label}
                         </span>
                       </div>
+
+                      {parsedData && (
+                        <div className="card-meta-info">
+                          <small>📄 {parsedData.document_type}</small>
+                          {parsedData.condition && <small>📋 {parsedData.condition}</small>}
+                        </div>
+                      )}
 
                       <div className="analysis-preview">
                         <p>{cleanText}</p>
