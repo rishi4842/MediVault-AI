@@ -1,14 +1,11 @@
 # 🩺 MediVault AI
-
-AI-powered Medical Image Analysis Platform built for the IDEA2IMPACT Online Hackathon 2026.
-
-## 🚀 Overview
+## Overview
 
 MediVault AI helps users upload medical X-ray images and receive AI-powered analysis in seconds. It provides a clean dashboard, diagnostic summary, medical history, and downloadable PDF reports.
 
 ---
 
-## ✨ Features
+##  Features
 
 - 🩻 Upload X-ray images
 - 🤖 AI-powered image analysis using Google Gemini AI
